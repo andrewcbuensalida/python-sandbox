@@ -36,6 +36,7 @@ def check_win(choices):
             return "You lose"
         else:
             return "You win"
+    return "Wrong input"
 
 
 def play():
