@@ -93,9 +93,6 @@ class Game:
         number_of_wins = 0
 
         while number_of_games_remaining > 0:
-            print("This is number_of_games_choice: ",number_of_games_choice)
-            print("This is number_of_games_remaining: ",number_of_games_remaining)
-            print("This is number_of_wins: ",number_of_wins)
             print(
                 f"\n{number_of_games_choice - number_of_games_remaining + 1} out of {number_of_games_choice} games................."
             )
