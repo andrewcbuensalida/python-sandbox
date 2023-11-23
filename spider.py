@@ -6,11 +6,17 @@ visited_urls = set()
 
 
 def spider(url, keyword):
-    if url in visited_urls or len(visited_urls) > 20:
+    if url in visited_urls or len(visited_urls) > 5:
         return
 
     try:
         print(url)
+        with open('urls.txt', 'w') as file:
+            file.write(url + '\n')
+        # Alternatively
+        # f = open("urls.txt", "a")
+        # f.write(url + '\n')
+        # f.close()
         response = requests.get(url)
     except:
         print(f"URL {url} is not valid. ")
@@ -26,15 +32,10 @@ def spider(url, keyword):
             if href is not None and href != "":
                 new_urls.append(href)
 
-        new_http_keyword_urls = list(
-            filter(
-                lambda new_url: keyword in new_url,
-                new_urls,
-            )
-        )
-
-        for new_url in new_http_keyword_urls:
-            spider(urljoin(url, new_url), keyword)
+        for new_url in new_urls:
+            base_and_new_url = urljoin(url, new_url)
+            if keyword in base_and_new_url:
+                spider(base_and_new_url, keyword)
 
 
 url = input("What url would you like to crawl?: ")
@@ -43,8 +44,8 @@ url = input("What url would you like to crawl?: ")
 keyword = input("What is the keyword?: ")
 spider(url, keyword)
 
-print(f"Example visited_urls: ")
-print(visited_urls)
+# print(f"Example visited_urls: ")
+# print(visited_urls)
 
 # example usage of urljoin. Basically takes the base part of the first aargument and adds the second argument to it.
 # print(

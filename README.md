@@ -31,3 +31,8 @@ To remove,
 
 # Work in pycharm because cmd in vs code won't stop spider.py's recursive requests
 
+
+# If gitignore is not working
+  `git rm -rf --cached .`
+  `git add .`
+

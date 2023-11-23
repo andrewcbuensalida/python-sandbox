@@ -1,0 +1,8 @@
+Good urls:
+https://www.yahoo.com/
+https://www.yahoo.com/news/us/
+https://www.yahoo.com/news/world/
+
+Bad urls:
+https://www.yahoasdfo.casdfom/news/wrongggggggggggg
+https://www.yahwronggggggggggggggggggggggggggitics/
