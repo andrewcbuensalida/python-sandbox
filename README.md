@@ -1,3 +1,5 @@
+# https://www.youtube.com/watch?v=XWuP5Yf5ILI&t=6130s
+
 # To create virtual environment
 Virtual environment is basically an environment to store requirements aka dependencies locally, not globally.
   `python -m venv <name of environment>`
