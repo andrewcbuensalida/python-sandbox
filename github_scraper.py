@@ -31,18 +31,17 @@ def find_urls_with_passwords_in_repo(repo_url):
         driver.get(current_url)
         visited_urls.append(current_url)
 
-        body = driver.find_element(By.TAG_NAME, "body")
-        body_inner_html = body.get_attribute("innerHTML") or ""
+        # body = driver.find_element(By.TAG_NAME, "body")
+        # body_inner_html = body.get_attribute("innerHTML") or ""
+        # Alternatively
+        body_inner_html = driver.page_source
 
         if "password" in body_inner_html:
-            # if "password" in body_inner_html:
-            print("in if age")
             urls_with_passwords.append(current_url)
 
         anchor_elements = driver.find_elements(
             By.CSS_SELECTOR, ".Link--primary"
         )  # TODO if this changes, it might break. Better to select all anchor tags instead.
-
 
         anchor_urls = []
         for element in anchor_elements:
@@ -80,11 +79,11 @@ gh_account_url = input("What github account would you like to scan for repos?")
 while True:
     urls_with_passwords = []
 
-    repo_urls = get_repos(gh_account_url) # for prod
+    repo_urls = get_repos(gh_account_url)  # for prod
     # repo_urls = get_repos("https://github.com/googleapis")  # for faster development
     # repo_urls = [
-    #     "https://github.com/googleapis/google-auth-library-python"  
-    #     # "https://github.com/andrewcbuensalida/scraper_test" # This works
+    #     # "https://github.com/googleapis/google-auth-library-python"
+    #     "https://github.com/andrewcbuensalida/scraper_test" # This works
     # ]  # for fastest development
 
     for repo_url in repo_urls:

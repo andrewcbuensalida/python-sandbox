@@ -7,7 +7,7 @@ If in wsl
   `python3 -m venv <name of environment>`
 This creates my-venv folder.
 
-To activate virtual environment, (remove .bat if in pycharm)
+To activate virtual environment, (remove .bat if in pycharm or powershell)
   `<name of environment>\Scripts\activate.bat`
 If in wsl
   `source <name of environment>/bin/activate`
@@ -16,10 +16,14 @@ Terminal should show `(<name of environment>)` to the left.
 
 To deactive
   `deactivate`
+Sometimes have to do relative path
+  `<name of environment>\Scripts\deactivate`
 
 # To save dependencies
 One at a time
   `pip install <name of dependency>`
+Sometimes it will only install globally, not locally in .venv\Lib\site-packages. When this is the case, use venv activated powershell and install like this:
+  `python my-venv\Scripts\pip.exe install <name of package>`
 
   `pip freeze > requirements.txt`
 
