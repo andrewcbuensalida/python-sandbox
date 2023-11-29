@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Todo</title>
+	</head>
+	<body>
+    <form action="">
+      <input type="text" placeholder="ex. buy milk" />
+      <button onclick="handleSave()" type="submit">save</button>
+
+    </form>
+		{{todos}}
+		<script>
+			async function handleSave() {
+				console.log("hello1");
+				const response = await fetch("http://127.0.0.1:5000/api/save", {
+					method: "POST",
+					body: 'new todo',
+				});
+				console.log(`Example response: `, response);
+			}
+		</script>
+	</body>
+</html>
