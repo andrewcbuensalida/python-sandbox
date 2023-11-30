@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-import time
-
 import socket
-print('starting....')
+
+print("starting....")
 # Creating the socket object
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -17,14 +16,17 @@ serversocket.bind(
 # Starting TCP listener
 serversocket.listen(3)
 
+clientsocket, address = serversocket.accept()  # This is blocking
+print("received connection from %s" % str(address))
+message = "hello! Thank you for connecting to the server" + "\r\n"
+
+clientsocket.send(message.encode("ascii"))
 while True:
-#     # Starting the connection
-    clientsocket, address = serversocket.accept() # This is blocking
-    print("received connection from %s" % str(address))
+    #     # Starting the connection
 
     # Message sent to client after successful connection
-    message = "hello! Thank you for connecting to the server" + "\r\n"
-
-    clientsocket.send(message.encode('ascii'))
-    clientsocket.close()
-
+    client_message = clientsocket.recv(1024).decode('ascii')
+    print('*********Example client_message: ', client_message)
+    clientsocket.send("".join(["Your message is this", client_message]).encode("ascii"))
+    if client_message == "exit":
+        clientsocket.close()
