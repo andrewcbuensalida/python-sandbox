@@ -1,4 +1,4 @@
-def fizzbuzz(n):
+def fizzbuzz1(n):
     for num in range(n):
         print(num)
         if num % 3 == 0 and num % 5 == 0:
@@ -9,4 +9,4 @@ def fizzbuzz(n):
             print("fizz")
 
 
-fizzbuzz(100)
+# fizzbuzz(100)

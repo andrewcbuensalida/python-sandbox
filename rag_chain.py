@@ -1,7 +1,7 @@
 
 rag_chain = (
     {"name": "R"} | {"name": "A"} | {"name": "G"} | {"name": "C"} 
-) # works without the parentheses as well
+) # works without the parentheses as well. | gets the union of the dicts. The last dict's value is the one that is retained in case of a key conflict.
 print(type(rag_chain))
 print(rag_chain)
 
@@ -20,5 +20,5 @@ def test_func():
 def test_func2():
     return {"name": "Hello, World!2"}
 
-rag_chain4 = test_func() | test_func2()
+rag_chain4 = test_func() | test_func2() 
 print(rag_chain4)
