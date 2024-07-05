@@ -5,3 +5,6 @@ for letter in range(len(a)):
 
 for i, l in enumerate(a):
     print(l + ' is at index ' + str(i) + ' in the list a')
+
+x: list[str] = ['a','b','c','d','e','f','g','h']
+
