@@ -13,7 +13,7 @@ source .venv/bin/activate
 
 For Windows
 ```bash
-.venv\Scripts\activate.bat
+.venv\Scripts\activate.bat  
 ```
 
 In the future, to deactivate venv
@@ -36,3 +36,7 @@ In the future, to deactivate venv
   `git rm -rf --cached .`
   `git add .`
 
+##
+To test
+`pytest -s`
+-s is to show prints
