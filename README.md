@@ -1,37 +1,31 @@
 # https://www.youtube.com/watch?v=XWuP5Yf5ILI&t=6130s
+## Create a virtual environment
 
-# To create virtual environment
-Virtual environment is basically an environment to store requirements aka dependencies locally, not globally.
-  `python -m venv <name of environment>`
-If in wsl
-  `python3 -m venv <name of environment>`
-This creates my-venv folder.
+```bash
+python -m venv .venv
+```
 
-To activate virtual environment, (remove .bat if in pycharm or powershell)
-  `<name of environment>\Scripts\activate.bat`
-If in wsl
-  `source <name of environment>/bin/activate`
+Activate the virtual environment (mac/linux):
 
-Terminal should show `(<name of environment>)` to the left.
+```bash
+source .venv/bin/activate
+```
 
-To deactive
-  `deactivate`
-Sometimes have to do relative path
-  `<name of environment>\Scripts\deactivate`
+For Windows
+```bash
+.venv\Scripts\activate.bat
+```
 
-# To save dependencies
-One at a time
-  `pip install <name of dependency>`
-Sometimes it will only install globally, not locally in .venv\Lib\site-packages. When this is the case, use venv activated powershell and install like this:
-  `python my-venv\Scripts\pip.exe install <name of package>`
+In the future, to deactivate venv
+```bash
+.venv\Scripts\deactivate.bat 
+```
 
-  `pip freeze > requirements.txt`
+## Install dependencies. This is not needed if doing a pip install in the notebook
+`pip install -r requirements.txt`
 
-If installing all dependencies from requirements.txt
-  `pip install -r requirements.txt`
-
-To remove,
-  `pip uninstall <name of dependency>`
+## To save dependencies into requirements.txt
+`pip freeze > requirements.txt`
 
 # Using the play button on the top right of the file uses global dependencies. Better to run the file in the command prompt with python <file.py> so you know it will use dependencies in virtual env.
 
