@@ -1,4 +1,4 @@
-def myDefaultParamWithType(a: int = 0) -> int:
+def myDefaultParamWithType(a: int = "andrew_buensalida") -> int:
     return a
 
 print(myDefaultParamWithType())

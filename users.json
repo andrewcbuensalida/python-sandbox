@@ -1,0 +1,22 @@
+[
+	{
+		"username": "andrew_buensalida",
+		"willAutoRenew": true,
+		"subscriptionType": "monthly",
+		"subscriptionStartDate": "2024-11-04 00:00:00",
+		"subscriptionCycleStartDate": "2024-11-04 00:00:00",
+		"subscriptionCycleEndDate": "2024-12-04 00:00:00",
+    "applicationsPerCycle":3000,
+    "easyApplyLimitReachedDate": "2024-11-04 00:00:00"
+	},
+	{
+		"username": "faz",
+		"willAutoRenew": true,
+		"subscriptionType": "monthly",
+		"subscriptionStartDate": "2024-11-04 00:00:00",
+		"subscriptionCycleStartDate": "2024-11-04 00:00:00",
+		"subscriptionCycleEndDate": "2024-12-04 00:00:00",
+		"applicationsPerCycle": 3000,
+		"easyApplyLimitReachedDate": "2024-11-04 00:00:00"
+	}
+]
