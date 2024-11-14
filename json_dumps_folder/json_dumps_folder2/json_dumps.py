@@ -26,12 +26,14 @@ if not calls_log.exists():
         )
 # 2. If the directory exists, load it and append the new entry, then 
 else:
-    with open(calls_log, "r+", encoding="utf-8") as f:
+    with open(calls_log, "r", encoding="utf-8") as f:
         try:
             existing_data = json.load(f)
         except json.JSONDecodeError:
             print("JSONDecodeError: File is empty or corrupted.")
             existing_data = []
+
+    with open(calls_log, "w", encoding="utf-8") as f:
         existing_data.append(log_entry)
         f.seek(0)
         f.truncate()
