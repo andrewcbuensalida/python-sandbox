@@ -26,10 +26,21 @@ async def handle_media_stream(websocket:WebSocket):
         async def send_to_twilio():
             async for openai_message in openai_ws:
                 print(f"Received from OpenAI: {openai_message}")
-                await websocket.send_text(openai_message)
+                if openai_message == 'tool':
+                    await websocket.send_text('typing')
+                    await openai_ws.send('trigger please wait')
+                    results = await execute_tools()
+                    await openai_ws.send(results)
+                    await websocket.send_text('stop typing')
+                else:
+                    await websocket.send_text(openai_message)
 
 
         await asyncio.gather(receive_from_twilio(), send_to_twilio())
+
+async def execute_tools():
+    await asyncio.sleep(5)
+    return 'Sunny'
 
 if __name__ == "__main__":
     import uvicorn

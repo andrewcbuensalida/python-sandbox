@@ -20,8 +20,17 @@ async def websocket_endpoint(websocket: WebSocket):
     async def receive_from_fake():
         async for message in websocket.iter_text():
             print(f"Received from fake: {message}")
-            print('''*Example message:\n''', message)
-            await websocket.send_text(f"hello {message}")
+            if message == 'get weather':
+                await websocket.send_text("tool")
+
+            elif message == 'trigger please wait':
+                await websocket.send_text("please")
+                await asyncio.sleep(1)
+                await websocket.send_text("wait")
+
+            else:
+                await websocket.send_text(f'Message is {message}')
+            
 
     await asyncio.gather(receive_from_fake())
 
