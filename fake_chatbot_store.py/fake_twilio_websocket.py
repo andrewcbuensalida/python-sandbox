@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,7 +26,7 @@ async def send_message(websocket:WebSocket):
                 await fake_ws.send(message)
         async def send_to_postman():
             async for fake_message in fake_ws:
-                print(f"Received from fake: {fake_message}")
+                print(f"Received from fake at {datetime.datetime.now()}: {fake_message}")
                 await websocket.send_text(fake_message)
 
         await asyncio.gather(receive_from_postman(), send_to_postman())

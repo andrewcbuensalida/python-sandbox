@@ -14,7 +14,7 @@ app.add_middleware(
 )
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def openai_websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     
     async def receive_from_fake():
