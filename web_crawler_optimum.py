@@ -41,20 +41,20 @@ class Solution:
     
     def crawl(self, startUrl: str, htmlParser: 'HtmlParser') -> List[str]:
         hostname = self.get_domain(startUrl)
-        futures = []
+        futures = set()
         visited = set()
         visited.add(startUrl)
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures.append(executor.submit(htmlParser.getUrls, startUrl))
+        with ThreadPoolExecutor(max_workers=100) as executor:
+            futures.add(executor.submit(htmlParser.getUrls, startUrl))
             while futures:
                 for future in as_completed(futures): # whenever a future is finished, it will loop, future being the one that is finished
                     # remove the future that just finished
-                    futures = [future_in_stack for future_in_stack in futures if future_in_stack is not future]
+                    futures.discard(future)
                     urls = future.result()
                     for url in urls:
                         if url not in visited and self.get_domain(url) == hostname:
                             visited.add(url)
-                            futures.append(executor.submit(htmlParser.getUrls, url))
+                            futures.add(executor.submit(htmlParser.getUrls, url))
                     break
         return list(visited)
 
