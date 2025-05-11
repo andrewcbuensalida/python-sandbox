@@ -13,6 +13,8 @@ from typing import List
 import threading
 from concurrent.futures import ThreadPoolExecutor, Future
 
+# news.yahoo.com 1 news.yahoo.com/1 2 news.yahoo.com/100 3                     4 []                    5
+#                  news.yahoo.com/2                                              news.yahoo.com/200    []
 class HtmlParser:
     def getUrls(self, url: str) -> List[str]:
         time.sleep(1) # Simulate network delay
@@ -20,7 +22,11 @@ class HtmlParser:
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/1","http://news.yahoo.com/2"]
         elif url == "http://news.yahoo.com/1":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/100"]
+        elif url == "http://news.yahoo.com/100":
+            time.sleep(1) # Simulate network delay
+            return []
         elif url == "http://news.yahoo.com/2":
+            time.sleep(1) # Simulate network delay
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/200"]
         else:
             return []
