@@ -30,6 +30,7 @@ class HtmlParser:
         elif url == "http://news.yahoo.com/200":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/2000"]
         elif url == "http://news.yahoo.com/2000":
+            raise Exception('This link is broken')
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20000"]
         else:
             return []
@@ -44,18 +45,29 @@ class Solution:
         futures = set()
         visited = set()
         visited.add(startUrl)
+        future_to_url = {}
+        bad_urls = []
         with ThreadPoolExecutor(max_workers=100) as executor:
-            futures.add(executor.submit(htmlParser.getUrls, startUrl))
+            startUrl_future = executor.submit(htmlParser.getUrls, startUrl)
+            futures.add(startUrl_future)
+            future_to_url[startUrl_future] = startUrl
             while futures:
                 for future in as_completed(futures): # whenever a future is finished, it will loop, future being the one that is finished
                     # remove the future that just finished
                     futures.discard(future)
-                    urls = future.result()
+                    try:
+                        urls = future.result()
+                    except Exception as e:
+                        bad_urls.append(future_to_url[future])
+                        continue
                     for url in urls:
                         if url not in visited and self.get_domain(url) == hostname:
                             visited.add(url)
-                            futures.add(executor.submit(htmlParser.getUrls, url))
+                            new_future = executor.submit(htmlParser.getUrls, url)
+                            futures.add(new_future)
+                            future_to_url[new_future] = url
                     break
+        print(bad_urls)
         return list(visited)
 
     
