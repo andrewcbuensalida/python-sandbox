@@ -28,14 +28,16 @@ class Solution:
     lock = threading.Lock()
     stack = []
     visited = set([])
+    domain = ''
 
     def get_domain(self,url):
         return url.split('/')[2]
     
-    def crawl_helper(self, htmlParser, domain):
+    def crawl_helper(self, htmlParser):
         with self.lock:
             current_url = self.stack.pop()
             if current_url not in self.visited:
+            # if current_url not in self.visited:
                 self.visited.add(current_url)
             else:
                 return
@@ -45,17 +47,17 @@ class Solution:
         
         with self.lock:
             for new_url in new_urls:
-                if new_url not in self.visited and domain == self.get_domain(new_url):
+                if new_url not in self.visited and self.domain == self.get_domain(new_url):
                     self.stack.append(new_url)
 
     def crawl(self, startUrl: str, htmlParser ) -> List[str]:
         self.stack.append(startUrl)
-        domain = self.get_domain(startUrl)
+        self.domain = self.get_domain(startUrl)
+        self.visited = set([])
         while self.stack:
-            print("visited:", self.visited)
             threads: list[threading.Thread] = []
             for _ in range(len(self.stack)):
-                thread = threading.Thread(target=self.crawl_helper, args=(htmlParser, domain))
+                thread = threading.Thread(target=self.crawl_helper, args=(htmlParser,))
                 threads.append(thread)
             
             for thread in threads:
