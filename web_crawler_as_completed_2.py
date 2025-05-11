@@ -45,7 +45,7 @@ class Solution:
             futures.append(executor.submit(htmlParser.getUrls, startUrl))
             while futures:
                 new_futures = []
-                for future in as_completed(futures):
+                for future in as_completed(futures): # whenever a future is finished, it will loop, future being the one that is finished
                     urls = future.result()
                     for url in urls:
                         if url not in visited and self.get_domain(url) == hostname:
