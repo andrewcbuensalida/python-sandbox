@@ -23,8 +23,6 @@ class HtmlParser:
         elif url == "http://news.yahoo.com/1":
             time.sleep(3)
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/10"]
-        elif url == "http://news.yahoo.com/10":
-            return []
         elif url == "http://news.yahoo.com/2":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20"]
         elif url == "http://news.yahoo.com/20":
@@ -49,14 +47,15 @@ class Solution:
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures.append(executor.submit(htmlParser.getUrls, startUrl))
             while futures:
-                new_futures = []
                 for future in as_completed(futures): # whenever a future is finished, it will loop, future being the one that is finished
+                    # remove the future that just finished
+                    futures = [future_in_stack for future_in_stack in futures if future_in_stack is not future]
                     urls = future.result()
                     for url in urls:
                         if url not in visited and self.get_domain(url) == hostname:
                             visited.add(url)
-                            new_futures.append(executor.submit(htmlParser.getUrls, url))
-                futures = new_futures
+                            futures.append(executor.submit(htmlParser.getUrls, url))
+                    break
         return list(visited)
 
     
