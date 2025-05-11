@@ -49,7 +49,7 @@ class Solution:
         self.htmlParser = htmlParser
         self.pending = []
 
-        with ThreadPoolExecutor(max_workers=64) as self.executor:
+        with ThreadPoolExecutor(max_workers=64) as self.executor: # or can do self.executor = ThreadPoolExecutor(max_workers=10) but would have to call self.executor.shutdown() at the end
             self.submit_to_executor(startUrl)
             while self.pending:
                 pending_so_far, self.pending = self.pending, []
