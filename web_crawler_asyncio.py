@@ -14,17 +14,22 @@ from typing import List
 
 class HtmlParser:
     async def getUrls(self, url: str) -> List[str]:
-        time.sleep(1) # Simulate network delay
+        await asyncio.sleep(1) # Simulate network delay
         if url == "http://news.yahoo.com":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/1","http://news.yahoo.com/2"]
         elif url == "http://news.yahoo.com/1":
-            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/100"]
-        elif url == "http://news.yahoo.com/100":
-            time.sleep(1) # Simulate network delay
-            return []
+            await asyncio.sleep(3)
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/10"]
         elif url == "http://news.yahoo.com/2":
-            time.sleep(1) # Simulate network delay
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20"]
+        elif url == "http://news.yahoo.com/20":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/200"]
+        elif url == "http://news.yahoo.com/200":
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/2000"]
+        elif url == "http://news.yahoo.com/2000":
+            # raise Exception('This link is broken') # not catching, even with try except block in helper
+            return []
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20000"]
         else:
             return []
 
@@ -52,8 +57,8 @@ class Solution:
 
         while stack:
             print("Stack:", stack)
-            # this runs per batch of new urls
             async with asyncio.TaskGroup() as tg:
+            # this runs per batch of new urls
                 for i in range(len(stack)):
                     print(i)
                     tg.create_task(self.crawl_helper(stack, visited, htmlParser, domain))

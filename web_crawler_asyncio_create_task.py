@@ -18,9 +18,18 @@ class HtmlParser:
         if url == "http://news.yahoo.com":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/1","http://news.yahoo.com/2"]
         elif url == "http://news.yahoo.com/1":
-            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/100"]
+            await asyncio.sleep(3)
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/10"]
         elif url == "http://news.yahoo.com/2":
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20"]
+        elif url == "http://news.yahoo.com/20":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/200"]
+        elif url == "http://news.yahoo.com/200":
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/2000"]
+        elif url == "http://news.yahoo.com/2000":
+            # raise Exception('This link is broken') # not catching, even with try except block in helper
+            return []
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20000"]
         else:
             return []
 
