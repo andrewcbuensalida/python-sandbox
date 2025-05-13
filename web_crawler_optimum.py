@@ -30,7 +30,7 @@ class HtmlParser:
         elif url == "http://news.yahoo.com/200":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/2000"]
         elif url == "http://news.yahoo.com/2000":
-            # raise Exception('This link is broken') # not catching, even with try except block in helper
+            # raise Exception('This link is broken',url) # not catching, even with try except block in helper
             return []
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20000"]
         else:
@@ -60,6 +60,8 @@ class Solution:
                     try:
                         urls = future.result()
                     except Exception as e:
+                        print(e)
+                        print(future.exception())
                         bad_urls.append(future_to_url[future])
                         continue
                     for url in urls:

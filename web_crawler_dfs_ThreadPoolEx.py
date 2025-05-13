@@ -22,13 +22,18 @@ class HtmlParser:
         if url == "http://news.yahoo.com":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/1","http://news.yahoo.com/2"]
         elif url == "http://news.yahoo.com/1":
-            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/100"]
-        elif url == "http://news.yahoo.com/100":
-            time.sleep(1) # Simulate network delay
-            return []
+            time.sleep(3)
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/10"]
         elif url == "http://news.yahoo.com/2":
-            time.sleep(1) # Simulate network delay
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20"]
+        elif url == "http://news.yahoo.com/20":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/200"]
+        elif url == "http://news.yahoo.com/200":
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/2000"]
+        elif url == "http://news.yahoo.com/2000":
+            # raise Exception('This link is broken',url) # not catching, even with try except block in helper
+            return []
+            return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20000"]
         else:
             return []
 
@@ -40,15 +45,15 @@ class Solution:
         initialHostname = startUrl.split("/")[2]
 
 
-        def _dfs(url):
-            with self.lock:
-                visited.add(url)
-            with ThreadPoolExecutor(16) as executor:
-                for nextUrl in htmlParser.getUrls(url):
-                    if nextUrl.split("/")[2] == initialHostname and nextUrl not in visited:
-                        executor.submit(_dfs, nextUrl)
-        
-        _dfs(startUrl)
+        with ThreadPoolExecutor(20) as executor:
+            def _dfs(url):
+                with self.lock:
+                    visited.add(url)
+                    for nextUrl in htmlParser.getUrls(url):
+                        if nextUrl.split("/")[2] == initialHostname and nextUrl not in visited:
+                            executor.submit(_dfs, nextUrl)
+            
+            _dfs(startUrl)
         return list(visited)
     
 crawler = Solution()
