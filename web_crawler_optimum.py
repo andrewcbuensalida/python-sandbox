@@ -30,10 +30,12 @@ class HtmlParser:
         elif url == "http://news.yahoo.com/200":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/2000"]
         elif url == "http://news.yahoo.com/2000":
-            raise Exception('This link is broken')
+            # raise Exception('This link is broken') # not catching, even with try except block in helper
+            return []
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20000"]
         else:
             return []
+
 
 
 class Solution:

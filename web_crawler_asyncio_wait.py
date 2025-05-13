@@ -17,12 +17,12 @@ import asyncio
 #                  news.yahoo.com/2                        news.yahoo.com/200    []
 
 class HtmlParser:
-    async def getUrls(self, url: str) -> List[str]:
-        await asyncio.sleep(1) # Simulate network delay
+    def getUrls(self, url: str) -> List[str]:
+        time.sleep(1) # Simulate network delay
         if url == "http://news.yahoo.com":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/1","http://news.yahoo.com/2"]
         elif url == "http://news.yahoo.com/1":
-            await asyncio.sleep(3)
+            time.sleep(3)
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/10"]
         elif url == "http://news.yahoo.com/2":
             return ["http://news.yahoo.com", "http://news.google.com","http://news.yahoo.com/20"]
@@ -53,7 +53,7 @@ class Solution:
         visited.add(startUrl)
         bad_urls = []
         async with asyncio.TaskGroup() as tg:
-            startUrl_task = tg.create_task(htmlParser.getUrls(startUrl))
+            startUrl_task = tg.create_task(asyncio.to_thread(htmlParser.getUrls,startUrl))
             tasks.add(startUrl_task)
 
             while tasks:
@@ -67,7 +67,7 @@ class Solution:
                 for url in urls:
                     if url not in visited and self.get_domain(url) == hostname:
                         visited.add(url)
-                        new_task = tg.create_task(htmlParser.getUrls(url))
+                        new_task = tg.create_task(asyncio.to_thread(htmlParser.getUrls,url))
                         tasks.add(new_task)
 
         return list(visited)
