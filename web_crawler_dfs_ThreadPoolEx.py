@@ -45,15 +45,15 @@ class Solution:
         initialHostname = startUrl.split("/")[2]
 
 
-        with ThreadPoolExecutor(20) as executor:
-            def _dfs(url):
+        def _dfs(url):
+            with ThreadPoolExecutor(20) as executor:
                 with self.lock:
                     visited.add(url)
                     for nextUrl in htmlParser.getUrls(url):
                         if nextUrl.split("/")[2] == initialHostname and nextUrl not in visited:
                             executor.submit(_dfs, nextUrl)
             
-            _dfs(startUrl)
+        _dfs(startUrl)
         return list(visited)
     
 crawler = Solution()

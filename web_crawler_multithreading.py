@@ -25,42 +25,29 @@ class HtmlParser:
             return []
 
 class Solution:
-    lock = threading.Lock()
-    stack = []
-    visited = set([])
-
-    def get_domain(self,url):
+    def get_hostname(self,url):
         return url.split('/')[2]
-    
-    def crawl_helper(self, htmlParser, domain):
-        current_url = self.stack.pop()
-        if current_url not in self.visited:
-            self.visited.add(current_url)
-        else:
-            return
 
-        new_urls = htmlParser.getUrls(current_url)
-        
+    def helper(self):
+        url = self.pending.pop()
+        new_urls = self.getUrls(url)
         for new_url in new_urls:
-            if new_url not in self.visited and domain == self.get_domain(new_url):
-                self.stack.append(new_url)
+            if self.get_hostname(new_url) == self.start_hostname and new_url not in self.visited:
+                self.visited.add(new_url)
+                self.pending.append(new_url)
 
-    def crawl(self, startUrl: str, htmlParser ) -> List[str]:
-        self.stack.append(startUrl)
-        domain = self.get_domain(startUrl)
-        while self.stack:
-            print("visited:", self.visited)
-            threads: list[threading.Thread] = []
-            for _ in range(len(self.stack)):
-                thread = threading.Thread(target=self.crawl_helper, args=(htmlParser, domain))
-                threads.append(thread)
-            
-            for thread in threads:
-                thread.start()
+    def crawl(self, startUrl: str, htmlParser: 'HtmlParser') -> List[str]:
+        self.visited = set([startUrl])
+        self.start_hostname = self.get_hostname(startUrl)
+        self.getUrls = htmlParser.getUrls
+        self.pending = list([startUrl])
 
-            for thread in threads:
-                thread.join()
-            
+        while self.pending:
+            threads = [threading.Thread(target=self.helper) for url in self.pending]
+            [thread.start() for thread in threads]
+            for future in threads:
+                future.join()
+
         return list(self.visited)
     
 crawler = Solution()
