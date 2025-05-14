@@ -39,37 +39,31 @@ class HtmlParser:
 
 
 class Solution:
-    def get_domain(self,url):
+    def get_hostname(self,url):
         return url.split('/')[2]
-    
+
     def crawl(self,startUrl,htmlParser):
-        return asyncio.run(self.helper(startUrl,htmlParser))
-         
-    
-    async def helper(self, startUrl: str, htmlParser: 'HtmlParser') -> List[str]:
-        hostname = self.get_domain(startUrl)
-        tasks = set()
-        visited = set()
-        visited.add(startUrl)
-        bad_urls = []
+        return asyncio.run(self.crawl_helper(startUrl,htmlParser))
+
+    async def crawl_helper(self, startUrl: str, htmlParser: 'HtmlParser') -> List[str]:
+        visited = set([startUrl])
+        startUrl_hostname = self.get_hostname(startUrl)
+
         async with asyncio.TaskGroup() as tg:
-            startUrl_task = tg.create_task(asyncio.to_thread(htmlParser.getUrls,startUrl))
-            tasks.add(startUrl_task)
+            startUrl_future = tg.create_task(asyncio.to_thread(htmlParser.getUrls,startUrl))
+            futures = set([startUrl_future])
 
-            while tasks:
-                done,pending = await asyncio.wait(tasks,return_when="FIRST_COMPLETED")
-                tasks = pending
-                urls = []
+            while futures:
+                done,futures = await asyncio.wait(futures,return_when='FIRST_COMPLETED')
+                new_urls = await done.pop()
+                    
+                for new_url in new_urls:
+                    if startUrl_hostname == self.get_hostname(new_url) and new_url not in visited:
+                        visited.add(new_url)
+                        new_future = tg.create_task(asyncio.to_thread(htmlParser.getUrls,new_url))
+                        futures.add(new_future)
 
-                for finished in done:
-                    urls += await finished
-
-                for url in urls:
-                    if url not in visited and self.get_domain(url) == hostname:
-                        visited.add(url)
-                        new_task = tg.create_task(asyncio.to_thread(htmlParser.getUrls,url))
-                        tasks.add(new_task)
-
+                
         return list(visited)
 
     

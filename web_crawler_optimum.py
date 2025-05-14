@@ -54,23 +54,22 @@ class Solution:
             futures.add(startUrl_future)
             future_to_url[startUrl_future] = startUrl
             while futures:
-                for future in as_completed(futures): # whenever a future is finished, it will loop, future being the one that is finished
-                    # remove the future that just finished
-                    futures.discard(future)
-                    try:
-                        urls = future.result()
-                    except Exception as e:
-                        print(e)
-                        print(future.exception())
-                        bad_urls.append(future_to_url[future])
-                        continue
-                    for url in urls:
-                        if url not in visited and self.get_domain(url) == hostname:
-                            visited.add(url)
-                            new_future = executor.submit(htmlParser.getUrls, url)
-                            futures.add(new_future)
-                            future_to_url[new_future] = url
-                    break
+                future = next(as_completed(futures)) # whenever a future is finished, it will loop, future being the one that is finished
+                # remove the future that just finished
+                futures.discard(future)
+                try:
+                    urls = future.result()
+                except Exception as e:
+                    print(e)
+                    print(future.exception())
+                    bad_urls.append(future_to_url[future])
+                    continue
+                for url in urls:
+                    if url not in visited and self.get_domain(url) == hostname:
+                        visited.add(url)
+                        new_future = executor.submit(htmlParser.getUrls, url)
+                        futures.add(new_future)
+                        future_to_url[new_future] = url
         print(bad_urls)
         return list(visited)
 
