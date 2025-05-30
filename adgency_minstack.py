@@ -44,20 +44,22 @@
 #         copy_stack.sort()
 #         print('''*Example copy_stack:\n''', copy_stack)
 #         return copy_stack[0]
-    
+
 #     def pop(self):
 #         self.stack.pop()
 #         print(self.stack)
 
 #     def top(self):
 #         return self.stack[-1]
-    
+
+
 # linked list version
 class Node:
     def __init__(self, value, min_value):
         self.value = value
         self.min_value = min_value
         self.next = None
+
 
 class MinStack:
     def __init__(self):
@@ -90,7 +92,7 @@ minStack = MinStack()
 minStack.push(-2)
 minStack.push(0)
 minStack.push(-3)
-print(minStack.getMin()) # Returns -3.
+print(minStack.getMin())  # Returns -3.
 minStack.pop()
-print(minStack.top()) # Returns 0.
-print(minStack.getMin()) # Returns -2.
+print(minStack.top())  # Returns 0.
+print(minStack.getMin())  # Returns -2.

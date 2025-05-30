@@ -25,8 +25,8 @@ while True:
     #     # Starting the connection
 
     # Message sent to client after successful connection
-    client_message = clientsocket.recv(1024).decode('ascii')
-    print('*********Example client_message: ', client_message)
+    client_message = clientsocket.recv(1024).decode("ascii")
+    print("*********Example client_message: ", client_message)
     clientsocket.send("".join(["Your message is this", client_message]).encode("ascii"))
     if client_message == "exit":
         clientsocket.close()

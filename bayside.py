@@ -52,6 +52,7 @@ The implementation should leverage Python's threading primitives.
 
 import threading
 
+
 class RunningAverage:
     def __init__(self):
         self.total = 0
@@ -69,6 +70,7 @@ class RunningAverage:
                 return 0.0  # Handle division by zero
             return self.total / self.count
 
+
 # Test cases with threading
 if __name__ == "__main__":
     ra = RunningAverage()
@@ -76,23 +78,25 @@ if __name__ == "__main__":
     def add_numbers():
         for i in range(1, 101):
             ra.add(i)
-            
+
     # threads = [threading.Thread(target=add_numbers) for _ in range(5)]
     threads = []
     for i in range(5):
         thread = threading.Thread(target=add_numbers)
         threads.append(thread)
 
-    print('threads:', threads)
-    
+    print("threads:", threads)
+
     for thread in threads:
         thread.start()
 
-    print('threads:', threads)
+    print("threads:", threads)
 
     for thread in threads:
         thread.join()
-    
-    print('threads:', threads)
 
-    print(ra.get_average())  # Should output the correct running average after all threads complete
+    print("threads:", threads)
+
+    print(
+        ra.get_average()
+    )  # Should output the correct running average after all threads complete

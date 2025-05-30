@@ -1,5 +1,5 @@
-from functools import reduce
 import random
+from functools import reduce
 from typing import List
 
 
@@ -60,7 +60,9 @@ class Hand:
             lambda accum, curr: accum + curr.rank["value"], self.cards, 0
         )
         # Aces 1 if value is over 21
-        number_of_aces = len([card for card in self.cards if card.rank["rank"] == "A"]) # could also do len(list(filter(lambda))) instead of this
+        number_of_aces = len(
+            [card for card in self.cards if card.rank["rank"] == "A"]
+        )  # could also do len(list(filter(lambda))) instead of this
         while temp_value > 21 and number_of_aces > 0:
             temp_value -= 10
             number_of_aces -= 1
@@ -156,7 +158,7 @@ class Game:
             # if dealer busts
             if dealer_hand.value > 21:
                 print("Dealer busted. You win!")
-                number_of_wins+=1
+                number_of_wins += 1
             # if tie
             elif dealer_hand.value == player_hand.value:
                 print("It's a tie!")
@@ -166,7 +168,7 @@ class Game:
             # if player wins
             elif dealer_hand.value < player_hand.value:
                 print("You win!")
-                number_of_wins+=1
+                number_of_wins += 1
 
             number_of_games_remaining -= 1
 

@@ -1,8 +1,9 @@
 # count the number of pairs in a list of integers that have a difference of k
 
-def solution(k, a): # 3, [1, 2, 4, 6, 8, 9, 12]
-#                               1  
-#                                  2
+
+def solution(k, a):  # 3, [1, 2, 4, 6, 8, 9, 12]
+    #                               1
+    #                                  2
     a = sorted(a)
     pointer1 = 0
     pointer2 = 0
@@ -28,6 +29,7 @@ def solution(k, a): # 3, [1, 2, 4, 6, 8, 9, 12]
             pointer1 += 1
     return count
 
+
 def count_consecutive(list, index):
     count = 1
     while index < len(list) - 1 and list[index] == list[index + 1]:
@@ -35,4 +37,5 @@ def count_consecutive(list, index):
         index += 1
     return count
 
-print('solution answer:', solution(3, [1, 1, 2, 4, 4, 7])) # answer should be 6
+
+print("solution answer:", solution(3, [1, 1, 2, 4, 4, 7]))  # answer should be 6

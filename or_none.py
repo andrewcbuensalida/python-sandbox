@@ -1,3 +1,3 @@
 a = "hey"
 
-print(a or 'it is none')
+print(a or "it is none")

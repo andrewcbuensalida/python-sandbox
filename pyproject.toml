@@ -1,0 +1,53 @@
+[project]
+name = "python-sandbox"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp>=3.12.4",
+    "flask>=3.1.1",
+    "requests>=2.32.3",
+]
+
+[dependency-groups]
+# Development tools (code formatting, linting)
+dev = [
+    "black>=25.1.0",
+    "flake8>=7.2.0",
+    "isort>=5.13.0",  # Import sorting
+    "mypy>=1.8.0",    # Type checking
+]
+
+# Testing dependencies
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",      # Coverage reporting
+    "pytest-mock>=3.12.0",    # Mocking utilities (fixed version)
+    "httpx>=0.27.0",           # HTTP testing for async
+]
+
+# Documentation dependencies
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings>=0.26.0",
+]
+
+# Production deployment tools
+deploy = [
+    "gunicorn>=22.0.0",        # WSGI server
+    "uvicorn>=0.34.0",         # ASGI server (if you add FastAPI)
+]
+
+# Database dependencies (optional)
+db = [
+    "sqlalchemy>=2.0.0",
+    "alembic>=1.13.0",        # Database migrations
+]
+
+# All development dependencies combined
+all = [
+    {include-group = "dev"},
+    {include-group = "test"},
+    {include-group = "docs"},
+]

@@ -2,8 +2,9 @@
 #   type words.txt | python fuzzer.py
 # type is the command prompt version of cat in linux
 
-import requests  # Don't name this file requests.py or else will get this error: AttributeError: partially initialized module 'requests' has no attribute 'get' (most likely due to a circular import)
 import sys
+
+import requests  # Don't name this file requests.py or else will get this error: AttributeError: partially initialized module 'requests' has no attribute 'get' (most likely due to a circular import)
 
 print("start")
 

@@ -12,19 +12,19 @@ class Exam:
 
     @score.setter
     def score(self, value):
-        print('''*********Example value:\n''', value)
+        print("""*********Example value:\n""", value)
         if not 0 <= value <= 100:
-            raise ValueError('Invalid exam score')
+            raise ValueError("Invalid exam score")
         self._score = value
 
-e = Exam('CSC102', 2019)
+
+e = Exam("CSC102", 2019)
 # print(e.__grade) # AttributeError: 'Exam' object has no attribute '__grade'
 e.score = 90
 print(e.score)
 
 
 if 0 < 1 < 2 < 3:
-    print('True')
-else:  
-    print('False')
-
+    print("True")
+else:
+    print("False")

@@ -11,11 +11,12 @@ class LStr:
         if self.index >= len(self.s):
             raise StopIteration
         return self.s[self.index]
-    
+
     def __iter__(self):
         return self
-    
-x = LStr('Python')
+
+
+x = LStr("Python")
 
 for i in x:
     print(i)

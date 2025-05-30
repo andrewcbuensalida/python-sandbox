@@ -10,7 +10,6 @@
 # print(x,y)
 
 
-
 # ## Question 4
 # values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 # if any([value % 2 for value in values]):
@@ -20,7 +19,6 @@
 
 # if any(False for value in values):
 #     print('done')
-
 
 
 ## Question 5
@@ -68,7 +66,7 @@
 #                 func()
 #             return wrapper
 #         return inner
-    
+
 # def login_required(func):
 #     def wrapper():
 #         return func()
@@ -94,7 +92,7 @@
 
 # def login_required(func):
 #     def wrapper():
-#         print('in login_required wrapper before') 
+#         print('in login_required wrapper before')
 #         func()
 #         print('in login_required wrapper after')
 #     return wrapper
@@ -106,7 +104,6 @@
 
 
 # say_whee()
-
 
 
 ## Question 6
@@ -140,5 +137,3 @@ x = [1, 2, 3, 4]
 
 for x[-1] in x:
     print(x)
-
-

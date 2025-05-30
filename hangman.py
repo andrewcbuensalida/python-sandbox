@@ -25,14 +25,14 @@ if __name__ == "__main__":
                     guessed_correctly = True
                     num_correct_guesses += 1
             else:
-                print('done')
+                print("done")
             if not guessed_correctly:
                 print("Wrong!\n ")
         else:
             print("You already guessed that letter!\n ")
 
         # if num_correct_guesses == len_secret_word:
-        if '_' not in displayed_word_list:  # alternative. 2 lines less.
+        if "_" not in displayed_word_list:  # alternative. 2 lines less.
             print(" ".join(displayed_word_list) + "\n")
             print("You win!\n")
             break

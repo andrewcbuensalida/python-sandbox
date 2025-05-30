@@ -1,3 +1,3 @@
-x = ['a','b','c'] if True else 'a'
+x = ["a", "b", "c"] if True else "a"
 
-print(range(1,5))
+print(range(1, 5))

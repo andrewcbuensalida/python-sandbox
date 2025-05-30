@@ -1,9 +1,10 @@
-import getpass
 import base64
+import getpass
 
 password = getpass.getpass("Password: ")
 
 print(password)
+
 
 def encrypt(password: str):
     encrypted = base64.b64encode(password.encode())

@@ -1,8 +1,9 @@
 def myfunc():
     try:
-        print('hello')
+        print("hello")
         return 1
     except:
-        print('world')
+        print("world")
+
 
 print(myfunc())

@@ -1,2 +1,1 @@
-
-print(None in 'None')
+print(None in "None")

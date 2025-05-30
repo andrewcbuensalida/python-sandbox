@@ -115,11 +115,7 @@
 # print("abc\rz")
 
 
-x = {
-    "a": 1,
-    "b": 2,
-    "c": 3
-}
+x = {"a": 1, "b": 2, "c": 3}
 
-a,b = x
+a, b = x
 print(a)  # a c

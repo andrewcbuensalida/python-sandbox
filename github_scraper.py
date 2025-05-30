@@ -1,6 +1,7 @@
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
 
 # Don't need to plug this in webdriver.Chrome() because I have a new version of selenium.
 # chrome_driver_path = "C:\\swe\\code\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe"

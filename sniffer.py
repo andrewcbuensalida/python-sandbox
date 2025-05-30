@@ -8,10 +8,11 @@ import socket
 from scapy.all import *
 from scapy.layers.l2 import Ether
 
-# Because no socket.AF_PACKET for Windows, trying https://stackoverflow.com/questions/39924563/python-raw-socket-to-ethernet-interface-windows/53681616#53681616 
+# Because no socket.AF_PACKET for Windows, trying https://stackoverflow.com/questions/39924563/python-raw-socket-to-ethernet-interface-windows/53681616#53681616
 IFACES.show()
 iface = IFACES.dev_from_index(1)
-print('*********Example iface:******** '); print(iface)
+print("*********Example iface:******** ")
+print(iface)
 # or <<IFACES.dev_from_pcapname(r"\\Device_stuff")>>
 socket = conf.L2socket(iface=iface)
 

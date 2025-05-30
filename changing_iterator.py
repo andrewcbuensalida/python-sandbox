@@ -23,7 +23,7 @@
 #     counter += 1
 
 
-x = set(['a','b','c'])
+x = set(["a", "b", "c"])
 counter = 0
 
 for item in x:

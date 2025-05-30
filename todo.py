@@ -1,8 +1,9 @@
 # Even though errors: Import "flask" could not be resolved, when starting the app with `flask --app flask_world run`, it works.
-from flask import Flask, render_template, request
-import random
 import base64
 import json
+import random
+
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 

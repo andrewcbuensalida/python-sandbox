@@ -1,6 +1,7 @@
-from bs4 import BeautifulSoup
-import requests
 from urllib.parse import urljoin
+
+import requests
+from bs4 import BeautifulSoup
 
 visited_urls = set()
 
@@ -11,8 +12,8 @@ def spider(url, keyword):
 
     try:
         print(url)
-        with open('urls.txt', 'w') as file:
-            file.write(url + '\n')
+        with open("urls.txt", "w") as file:
+            file.write(url + "\n")
         # Alternatively
         # f = open("urls.txt", "a")
         # f.write(url + '\n')

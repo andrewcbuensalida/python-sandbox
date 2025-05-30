@@ -1,6 +1,8 @@
 import asyncio
 import time
+
 import requests
+
 
 def sync_fetch_data(id):
     """Synchronous function to fetch data using requests"""
@@ -12,9 +14,11 @@ def sync_fetch_data(id):
     print(f"Data fetched for ID: {id}")
     return data
 
+
 async def fetch_data(id):
     """Async wrapper that runs the sync function in a thread"""
     return await asyncio.to_thread(sync_fetch_data, id)
+
 
 async def main():
     task1 = asyncio.create_task(fetch_data(1))
@@ -25,9 +29,10 @@ async def main():
     result1 = await task1
     print("Task 1 completed")
     result2 = await task2
-    
+
     print(result1)
     print(result2)
+
 
 start_time = time.perf_counter()
 asyncio.run(main())

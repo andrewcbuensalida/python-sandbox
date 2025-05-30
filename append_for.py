@@ -1,8 +1,8 @@
-string1 = ['a', 'b', 'c']
+string1 = ["a", "b", "c"]
 counter = 0
 
 # for i in range(len(string1)): range doesn't change when appending
-for c in string1: # string1 changes when appending
+for c in string1:  # string1 changes when appending
     print(string1)
     print(c)
     string1.append(str(counter))
