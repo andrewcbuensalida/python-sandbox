@@ -1,24 +1,17 @@
 import asyncio
 import time
+import requests
 
 async def fetch_data(id, delay):
     print(f"Fetching data for ID: {id}")
-    await asyncio.sleep(delay)
+    # This still blocks
+    requests.get(f"https://jsonplaceholder.typicode.com/posts/{id}")
     print(f"Data fetched for ID: {id}")
     return f"Data for ID: {id}"
 
 async def main():
-    task1 = asyncio.create_task(fetch_data(1, 2))
-    task2 = asyncio.create_task(fetch_data(2, 1))
-
-    print("Tasks created, waiting for results...")
-
-    result1 = await task1
-    print("Task 1 completed")
-    result2 = await task2
-    
-    print(result1)
-    print(result2)
+    tasks = [asyncio.create_task(fetch_data(i, 1)) for i in range(1, 100)]
+    results = await asyncio.gather(*tasks)
 
 start_time = time.perf_counter()
 asyncio.run(main())

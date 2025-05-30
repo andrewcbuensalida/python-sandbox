@@ -15,17 +15,16 @@ async def fetch_data(session, id):
 
 async def main():
     async with aiohttp.ClientSession() as session:
-        task1 = asyncio.create_task(fetch_data(session, 1))
-        task2 = asyncio.create_task(fetch_data(session, 2))
+        tasks = []
+        for i in range(1, 101):
+            task = asyncio.create_task(fetch_data(session, i))
+            tasks.append(task)
 
         print("Tasks created, waiting for results...")
 
-        result1 = await task1
-        print("Task 1 completed")
-        result2 = await task2
+        results = await asyncio.gather(*tasks)
         
-        print(result1)
-        print(result2)
+        print(f"Completed {len(results)} tasks")
 
 start_time = time.perf_counter()
 asyncio.run(main())
