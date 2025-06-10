@@ -96,8 +96,21 @@ class WebScraper:
         
         # HTTP session for connection pooling
         self.session = requests.Session()
+        
+        # Use realistic browser headers to avoid 403 errors
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (compatible; WebScraper/1.0; +https://example.com/bot)'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Charset': 'utf-8',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
         })
         # Disable SSL verification for testing internal sites
         self.session.verify = False
@@ -364,10 +377,33 @@ class WebScraper:
                 self.logger.info(f"Robots.txt disallows scraping: {url}")
                 return [], False
             
-            # Make request
-            response = self.session.get(url, timeout=self.timeout)
-            response.raise_for_status()
-            
+            # Make request with retry logic for 403 errors
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    # Add some jitter to delay to appear more human-like
+                    if attempt > 0:
+                        import random
+                        extra_delay = random.uniform(2, 5)
+                        time.sleep(extra_delay)
+                        self.logger.info(f"Retry attempt {attempt + 1} for {url} after {extra_delay:.1f}s delay")
+                    
+                    response = self.session.get(url, timeout=self.timeout)
+                    response.raise_for_status()
+                    break  # Success, exit retry loop
+                    
+                except requests.exceptions.HTTPError as e:
+                    if response.status_code == 403:
+                        self.logger.warning(f"403 Forbidden for {url} (attempt {attempt + 1}/{max_retries})")
+                        if attempt == max_retries - 1:
+                            self.logger.error(f"All retries failed for {url}: {e}")
+                            self.stats["pages_failed"] += 1
+                            return [], False
+                        continue  # Try again with different headers
+                    else:
+                        # For other HTTP errors, don't retry
+                        raise e
+                        
             # Check content type
             content_type = response.headers.get('content-type', '').lower()
             if 'text/html' not in content_type:
