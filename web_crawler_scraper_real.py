@@ -37,6 +37,7 @@ class WebScraper:
         output_dir: str = "scraped_content",
         output_file: str = "scraped_content.txt",
         content_selector: str = "#main-content",
+        allowed_paths: Optional[List[str]] = None,
         max_workers: int = 10,
         delay_between_requests: float = 1.0,
         max_pages: int = 100,
@@ -51,6 +52,7 @@ class WebScraper:
             output_dir: Directory to save scraped content
             output_file: Single file to save all scraped content
             content_selector: CSS selector for the main content element (e.g., "#main-content", ".content", "main", "article")
+            allowed_paths: List of URL paths to include (e.g., ["/docs", "/api"]). If None, uses the starting URL's path as base
             max_workers: Maximum number of concurrent threads
             delay_between_requests: Delay between requests (seconds)
             max_pages: Maximum number of pages to scrape
@@ -62,6 +64,7 @@ class WebScraper:
         self.output_dir.mkdir(exist_ok=True)
         self.output_file = self.output_dir / output_file
         self.content_selector = content_selector
+        self.allowed_paths = allowed_paths or []
         
         self.max_workers = max_workers
         self.delay_between_requests = delay_between_requests
@@ -99,6 +102,23 @@ class WebScraper:
         # Disable SSL verification for testing internal sites
         self.session.verify = False
         
+        # Additional SSL configuration
+        import ssl
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.ssl_ import create_urllib3_context
+        
+        # Create a custom SSL context that doesn't verify certificates
+        class NoSSLAdapter(HTTPAdapter):
+            def init_poolmanager(self, *args, **kwargs):
+                context = create_urllib3_context()
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+                kwargs['ssl_context'] = context
+                return super().init_poolmanager(*args, **kwargs)
+        
+        # Mount the adapter for HTTPS
+        self.session.mount('https://', NoSSLAdapter())
+        
         # Suppress SSL warnings
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -116,14 +136,25 @@ class WebScraper:
         self.logger = logging.getLogger(__name__)
 
     def _normalize_url(self, url: str) -> str:
-        """Normalize URL by removing fragments and converting to lowercase."""
+        """Normalize URL by removing fragments while preserving case-sensitive paths."""
         # Remove fragment (anchor)
         url, _ = urldefrag(url)
-        # Convert to lowercase for consistency
-        return url.lower().strip()
+        # Parse URL to handle case sensitivity properly
+        parsed = urlparse(url)
+        
+        # Only lowercase the scheme and netloc (domain), preserve path case
+        normalized_url = f"{parsed.scheme.lower()}://{parsed.netloc.lower()}"
+        if parsed.path:
+            normalized_url += parsed.path  # Keep original case for path
+        if parsed.params:
+            normalized_url += f";{parsed.params}"
+        if parsed.query:
+            normalized_url += f"?{parsed.query}"
+        
+        return normalized_url.strip()
 
-    def _is_valid_url(self, url: str, base_domain: str, base_path: str = "") -> bool:
-        """Check if URL is valid for scraping."""
+    def _is_valid_url(self, url: str, base_domain: str, allowed_paths: Optional[List[str]] = None) -> bool:
+        """Check if URL is valid for scraping based on domain and path filtering."""
         try:
             parsed = urlparse(url)
             
@@ -139,9 +170,17 @@ class WebScraper:
             if self.same_domain_only and parsed.netloc != base_domain:
                 return False
             
-            # Path filtering - only scrape URLs that start with the base path
-            if base_path and not parsed.path.startswith(base_path):
-                return False
+            # Dynamic path filtering
+            if allowed_paths:
+                # Check if URL path starts with any of the allowed paths
+                url_path = parsed.path.rstrip('/')  # Remove trailing slash for consistency
+                path_allowed = any(
+                    url_path.startswith(allowed_path.rstrip('/')) 
+                    for allowed_path in allowed_paths
+                )
+                if not path_allowed:
+                    self.logger.debug(f"URL {url} not in allowed paths: {allowed_paths}")
+                    return False
                 
             return True
         except Exception:
@@ -159,11 +198,18 @@ class WebScraper:
             with self.robots_lock:
                 if base_url not in self.robots_cache:
                     robots_url = urljoin(base_url, '/robots.txt')
-                    rp = RobotFileParser()
-                    rp.set_url(robots_url)
                     try:
-                        rp.read()
-                        self.robots_cache[base_url] = rp
+                        # Use our session to respect SSL settings
+                        response = self.session.get(robots_url, timeout=10)
+                        if response.status_code == 200:
+                            rp = RobotFileParser()
+                            rp.set_url(robots_url)
+                            # Set the robots.txt content manually
+                            rp.read()
+                            self.robots_cache[base_url] = rp
+                        else:
+                            # If robots.txt not found, allow scraping
+                            self.robots_cache[base_url] = None
                     except Exception as e:
                         self.logger.warning(f"Could not read robots.txt for {base_url}: {e}")
                         # If we can't read robots.txt, allow scraping
@@ -302,7 +348,7 @@ class WebScraper:
             self.logger.error(f"Error saving content for {url}: {e}")
             return ""
 
-    def _scrape_single_url(self, url: str, base_domain: str, base_path: str = "") -> Tuple[List[str], bool]:
+    def _scrape_single_url(self, url: str, base_domain: str, allowed_paths: Optional[List[str]] = None) -> Tuple[List[str], bool]:
         """
         Scrape a single URL and return found links.
         
@@ -349,7 +395,7 @@ class WebScraper:
             # Filter valid links
             valid_links = [
                 link for link in links 
-                if self._is_valid_url(link, base_domain, base_path)
+                if self._is_valid_url(link, base_domain, allowed_paths)
             ]
             
             # Save content
@@ -383,11 +429,19 @@ class WebScraper:
         start_url = self._normalize_url(start_url)
         parsed_start = urlparse(start_url)
         base_domain = parsed_start.netloc
-        base_path = parsed_start.path.rstrip('/')  # Remove trailing slash for consistency
+        
+        # Determine allowed paths - use configured paths or derive from start URL
+        if self.allowed_paths:
+            allowed_paths = self.allowed_paths
+        else:
+            # Auto-detect base path from start URL
+            base_path = parsed_start.path.rstrip('/')
+            # Include the base path and any sub-paths
+            allowed_paths = [base_path] if base_path else ["/"]
         
         self.logger.info(f"Starting scrape from: {start_url}")
         self.logger.info(f"Base domain: {base_domain}")
-        self.logger.info(f"Base path: {base_path}")
+        self.logger.info(f"Allowed paths: {allowed_paths}")
         self.logger.info(f"Max pages: {self.max_pages}")
         self.logger.info(f"Max workers: {self.max_workers}")
         
@@ -405,7 +459,7 @@ class WebScraper:
                         if url not in self.visited_urls:
                             self.visited_urls.add(url)
                             current_batch.add(url)
-                            future_to_url[executor.submit(self._scrape_single_url, url, base_domain, base_path)] = url
+                            future_to_url[executor.submit(self._scrape_single_url, url, base_domain, allowed_paths)] = url
                         else:
                             self.stats["pages_skipped_duplicate_url"] += 1
                 
@@ -454,24 +508,26 @@ class WebScraper:
 
 
 def main():
-    """Example usage of the WebScraper with dynamic content selector."""
-    # Example usage with different content selectors
+    """Example usage of the WebScraper with dynamic content selector and path filtering."""
+    # Example usage with dynamic path filtering
     scraper = WebScraper(
         output_dir="scraped_content",
-        content_selector="#main-content",  # Default for GitHub Pages sites
+        content_selector=".md-content",  # CSS selector for content
+        allowed_paths=["/000/a"],  # Only scrape URLs in this path
         max_workers=5,
         delay_between_requests=1.0,
         max_pages=20,
         same_domain_only=True,
-        respect_robots=True,
+        respect_robots=False,  # Disable robots.txt for internal sites to avoid SSL issues
     )
     
     # Start scraping from a URL
-    start_url = "https://sample.com/path1"  
+    start_url = "https://somewebsite.com/000/"  
     
     print(f"Starting web scraper...")
     print(f"Output directory: {scraper.output_dir}")
     print(f"Content selector: {scraper.content_selector}")
+    print(f"Allowed paths: {scraper.allowed_paths}")
     
     try:
         stats = scraper.scrape(start_url)
@@ -482,6 +538,7 @@ def main():
         print("\nScraping interrupted by user")
     except Exception as e:
         print(f"Error during scraping: {e}")
+        
 
 if __name__ == "__main__":
     main()
