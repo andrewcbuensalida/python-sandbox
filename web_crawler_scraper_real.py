@@ -410,11 +410,19 @@ class WebScraper:
                 self.logger.info(f"Skipping non-HTML content: {url} ({content_type})")
                 return [], False
             
-            content = response.text
+            # Handle content encoding and charset properly
+            content = self._decode_response_content(response, url)
             
             # Extract content text for hashing using dynamic selector
             soup = BeautifulSoup(content, 'html.parser')
             text_content = self._extract_content_text(soup)
+            
+            # Check for garbled/binary content
+            if self._is_content_garbled(text_content):
+                self.logger.warning(f"Detected garbled content for {url}, saving debug info")
+                self._save_debug_content(url, response, text_content)
+                # Skip this URL as content is corrupted
+                return [], False
             
             # Check for duplicate content using extracted text hash
             content_hash = self._get_content_hash(text_content)
@@ -424,10 +432,8 @@ class WebScraper:
                     self.logger.info(f"Skipping duplicate content: {url}")
                     return [], False
                 self.content_hashes.add(content_hash)
-            
             # Extract links
             links = self._extract_links(content, url)
-            
             # Filter valid links
             valid_links = [
                 link for link in links 
@@ -542,14 +548,180 @@ class WebScraper:
             avg_time = duration / self.stats['pages_scraped']
             self.logger.info(f"Average time per page: {avg_time:.2f} seconds")
 
+    def _decode_response_content(self, response, url: str) -> str:
+        """
+        Properly decode response content handling various encodings and compression.
+        
+        Args:
+            response: requests.Response object
+            url: URL being processed (for logging)
+            
+        Returns:
+            Decoded content as string
+        """
+        try:
+            # Check content encoding
+            content_encoding = response.headers.get('content-encoding', '').lower()
+            self.logger.debug(f"Content-Encoding for {url}: {content_encoding}")
+            
+            # Check charset from Content-Type header
+            content_type = response.headers.get('content-type', '')
+            charset = 'utf-8'  # Default
+            
+            if 'charset=' in content_type:
+                try:
+                    charset = content_type.split('charset=')[1].split(';')[0].strip()
+                    self.logger.debug(f"Detected charset for {url}: {charset}")
+                except:
+                    charset = 'utf-8'
+            
+            # Handle different compression types explicitly
+            if content_encoding in ['br', 'brotli']:
+                # Handle Brotli compression
+                try:
+                    import brotli
+                    decompressed = brotli.decompress(response.content)
+                    content = decompressed.decode(charset, errors='replace')
+                    self.logger.debug(f"Successfully decompressed Brotli content for {url}")
+                    return content
+                except ImportError:
+                    self.logger.warning(f"Brotli compression detected but brotli module not available for {url}")
+                    # Fall back to requests.text which might handle it
+                    pass
+                except Exception as e:
+                    self.logger.warning(f"Failed to decompress Brotli content for {url}: {e}")
+                    # Fall back to requests.text
+                    pass
+            
+            elif content_encoding in ['gzip', 'deflate']:
+                # These should be handled automatically by requests, but check
+                self.logger.debug(f"Gzip/deflate compression detected for {url}")
+            
+            # Let requests handle decompression automatically
+            try:
+                # This should handle gzip/deflate and sometimes brotli automatically
+                content = response.text
+                
+                # Check if content still looks like binary after requests processing
+                if self._looks_like_binary(content):
+                    self.logger.warning(f"Content still appears binary after requests.text for {url}")
+                    # Try manual decoding of raw content
+                    try:
+                        content = response.content.decode(charset, errors='replace')
+                        self.logger.info(f"Used manual content decoding for {url}")
+                    except:
+                        content = response.content.decode('utf-8', errors='replace')
+                        self.logger.warning(f"Used UTF-8 fallback for {url}")
+                
+                return content
+                
+            except UnicodeDecodeError as e:
+                self.logger.warning(f"Unicode decode error for {url}: {e}")
+                # Try different encodings
+                for fallback_charset in ['utf-8', 'latin1', 'cp1252', 'iso-8859-1']:
+                    try:
+                        content = response.content.decode(fallback_charset, errors='replace')
+                        self.logger.info(f"Successfully decoded {url} using {fallback_charset}")
+                        return content
+                    except:
+                        continue
+                
+                # Last resort: decode with error replacement
+                content = response.content.decode('utf-8', errors='replace')
+                self.logger.warning(f"Used error replacement for {url}")
+                return content
+                
+        except Exception as e:
+            self.logger.error(f"Error decoding content for {url}: {e}")
+            # Emergency fallback
+            try:
+                return response.content.decode('utf-8', errors='replace')
+            except:
+                return str(response.content)
+
+    def _looks_like_binary(self, content: str) -> bool:
+        """Quick check if content looks like binary data."""
+        if not content or len(content) < 100:
+            return False
+        
+        # Check first 100 characters for excessive non-printable chars
+        non_printable = sum(1 for c in content[:100] if ord(c) < 32 and c not in '\n\r\t\f')
+        return non_printable > 10  # More than 10% non-printable
+
+    def _save_debug_content(self, url: str, response, text_content: str) -> None:
+        """Save debug information for content encoding issues."""
+        try:
+            debug_file = self.output_dir / f"debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(f"Debug Info for: {url}\n")
+                f.write(f"{'='*50}\n")
+                f.write(f"Status Code: {response.status_code}\n")
+                f.write(f"Content-Type: {response.headers.get('content-type', 'N/A')}\n")
+                f.write(f"Content-Encoding: {response.headers.get('content-encoding', 'N/A')}\n")
+                f.write(f"Content-Length: {response.headers.get('content-length', 'N/A')}\n")
+                f.write(f"Transfer-Encoding: {response.headers.get('transfer-encoding', 'N/A')}\n")
+                f.write(f"Detected Encoding: {response.encoding}\n")
+                f.write(f"Text Content Length: {len(text_content)}\n")
+                f.write(f"Binary Content Length: {len(response.content)}\n")
+                f.write(f"First 500 chars of text content:\n")
+                f.write(f"{repr(text_content[:500])}\n")
+                f.write(f"{'='*50}\n")
+                
+            self.logger.info(f"Debug info saved to: {debug_file}")
+            
+        except Exception as e:
+            self.logger.error(f"Error saving debug info: {e}")
+
+    def _is_content_garbled(self, text_content: str) -> bool:
+        """
+        Check if content appears to be garbled or binary data.
+        
+        Args:
+            text_content: The extracted text content
+            
+        Returns:
+            True if content appears garbled, False otherwise
+        """
+        if not text_content or len(text_content.strip()) < 10:
+            return False
+            
+        # Check for null bytes (clear sign of binary data)
+        if '\x00' in text_content:
+            return True
+            
+        # Count non-printable characters (excluding common whitespace)
+        non_printable_count = 0
+        for char in text_content[:1000]:  # Check first 1000 chars
+            if ord(char) < 32 and char not in '\n\r\t\f':
+                non_printable_count += 1
+        
+        # If more than 10% of characters are non-printable, likely garbled
+        if len(text_content[:1000]) > 0 and (non_printable_count / len(text_content[:1000])) > 0.1:
+            return True
+            
+        # Check for patterns common in compressed/binary data
+        garbled_patterns = [
+            b'\x1f\x8b',  # gzip magic number
+            b'PK\x03\x04',  # zip magic number
+            b'\xff\xfe',  # UTF-16 BOM
+            b'\xfe\xff',  # UTF-16 BE BOM
+        ]
+        
+        content_bytes = text_content.encode('utf-8', errors='ignore')[:100]
+        for pattern in garbled_patterns:
+            if pattern in content_bytes:
+                return True
+                
+        return False
 
 def main():
     """Example usage of the WebScraper with dynamic content selector and path filtering."""
     # Example usage with dynamic path filtering
     scraper = WebScraper(
         output_dir="scraped_content",
-        content_selector=".md-content",  # CSS selector for content
-        allowed_paths=["/000/a"],  # Only scrape URLs in this path
+        content_selector="main",  # CSS selector for content
+        allowed_paths=["/flux"],  # Only scrape URLs in this path
         max_workers=5,
         delay_between_requests=1.0,
         max_pages=20,
@@ -558,7 +730,7 @@ def main():
     )
     
     # Start scraping from a URL
-    start_url = "https://somewebsite.com/000/"  
+    start_url = "https://fluxcd.io/flux/"  
     
     print(f"Starting web scraper...")
     print(f"Output directory: {scraper.output_dir}")
